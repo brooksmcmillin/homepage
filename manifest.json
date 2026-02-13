@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Homepage",
+  "version": "1.0.0",
+  "description": "New tab page showing today's tasks and RSS feed",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "https://todo.brooksmcmillin.com/*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "homepage@local",
+      "strict_min_version": "109.0"
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.svg",
+    "96": "icons/icon-96.svg"
+  }
+}
