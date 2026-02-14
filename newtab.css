@@ -165,6 +165,8 @@ body {
   padding: 0.625rem 0.5rem;
   border-radius: var(--radius);
   transition: background 0.15s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .task-item:hover {

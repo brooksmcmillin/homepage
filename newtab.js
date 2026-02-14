@@ -1,4 +1,5 @@
 const API_BASE = "https://todo.brooksmcmillin.com/api";
+const APP_BASE = "https://todo.brooksmcmillin.com";
 
 function todayStr() {
   const d = new Date();
@@ -95,8 +96,10 @@ function renderTaskItem(task) {
     metaParts.push(`<span>${escapeHtml(formatted)}</span>`);
   }
 
+  const taskUrl = `${APP_BASE}/task/${task.id}`;
+
   return `
-    <div class="task-item">
+    <a class="task-item" href="${escapeHtml(taskUrl)}" target="_blank" rel="noopener">
       <span class="priority-dot ${priority}"></span>
       <div class="task-content">
         <div class="task-title">${escapeHtml(task.title)}</div>
@@ -106,7 +109,7 @@ function renderTaskItem(task) {
           ${tags}
         </div>
       </div>
-    </div>
+    </a>
   `;
 }
 
