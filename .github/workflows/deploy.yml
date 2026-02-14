@@ -1,0 +1,108 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Sign & Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match manifest.json version ($MANIFEST_VERSION)"
+            exit 1
+          fi
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build extension
+        uses: kewisch/action-web-ext@v1
+        id: build
+        with:
+          cmd: build
+          source: .
+
+      - name: Sign extension
+        uses: kewisch/action-web-ext@v1
+        id: sign
+        with:
+          cmd: sign
+          source: ${{ steps.build.outputs.target }}
+          channel: unlisted
+          apiKey: ${{ secrets.AMO_JWT_ISSUER }}
+          apiSecret: ${{ secrets.AMO_JWT_SECRET }}
+
+      - name: Prepare release asset
+        id: asset
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SIGNED_XPI="${{ steps.sign.outputs.target }}"
+          ASSET_NAME="homepage-${VERSION}.xpi"
+          cp "$SIGNED_XPI" "$ASSET_NAME"
+          SHA256=$(sha256sum "$ASSET_NAME" | cut -d' ' -f1)
+          echo "asset_name=$ASSET_NAME" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Update updates.json
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA256: ${{ steps.asset.outputs.sha256 }}
+          ASSET_NAME: ${{ steps.asset.outputs.asset_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 -c "
+          import json, os
+
+          version = os.environ['VERSION']
+          sha256 = os.environ['SHA256']
+          asset_name = os.environ['ASSET_NAME']
+          repo = os.environ['REPO']
+
+          download_url = f'https://github.com/{repo}/releases/download/v{version}/{asset_name}'
+
+          with open('updates.json') as f:
+              data = json.load(f)
+
+          updates = data['addons']['homepage@brooksmcmillin.com']['updates']
+          updates.append({
+              'version': version,
+              'update_link': download_url,
+              'update_hash': f'sha256:{sha256}'
+          })
+
+          with open('updates.json', 'w') as f:
+              json.dump(data, f, indent=2)
+              f.write('\n')
+          "
+
+      - name: Commit and push updates.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updates.json
+          git commit -m "Update updates.json for v${{ steps.version.outputs.version }}"
+          git push origin HEAD:main
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            "${{ steps.asset.outputs.asset_name }}" \
+            --title "v${{ steps.version.outputs.version }}" \
+            --generate-notes

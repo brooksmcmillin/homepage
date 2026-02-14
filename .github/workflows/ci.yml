@@ -27,7 +27,7 @@ jobs:
         run: python3 -c "import json; json.load(open('manifest.json'))"
 
       - name: web-ext lint
-        run: npx web-ext lint --source-dir=.
+        run: npx web-ext lint --source-dir=. --self-hosted
 
   extension-build:
     name: Extension Build
