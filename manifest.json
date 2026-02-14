@@ -11,8 +11,9 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "homepage@local",
+      "id": "homepage@brooksmcmillin.com",
       "strict_min_version": "109.0",
+      "update_url": "https://raw.githubusercontent.com/brooksmcmillin/homepage/main/updates.json",
       "data_collection_permissions": {
         "required": ["none"]
       }
