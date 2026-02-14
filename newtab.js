@@ -161,8 +161,13 @@ async function loadTasks() {
 
 // Articles
 
+let feedFilter = localStorage.getItem("feedFilter") || "featured";
+
 async function fetchArticles() {
   const params = new URLSearchParams({ limit: "30", unread_only: "true" });
+  if (feedFilter === "featured") {
+    params.set("featured", "true");
+  }
   const resp = await fetch(`${API_BASE}/news?${params}`, {
     credentials: "include",
   });
@@ -216,8 +221,35 @@ async function loadArticles() {
   }
 }
 
+// Feed toggle
+
+function initFeedToggle() {
+  const toggle = document.getElementById("feed-toggle");
+  const buttons = toggle.querySelectorAll(".feed-toggle-btn");
+
+  // Set initial active state from stored preference
+  buttons.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.feedFilter === feedFilter);
+  });
+
+  toggle.addEventListener("click", (e) => {
+    const btn = e.target.closest(".feed-toggle-btn");
+    if (!btn || btn.dataset.feedFilter === feedFilter) return;
+
+    feedFilter = btn.dataset.feedFilter;
+    localStorage.setItem("feedFilter", feedFilter);
+
+    buttons.forEach((b) => {
+      b.classList.toggle("active", b.dataset.feedFilter === feedFilter);
+    });
+
+    loadArticles();
+  });
+}
+
 // Init
 
 renderHeader();
+initFeedToggle();
 loadTasks();
 loadArticles();

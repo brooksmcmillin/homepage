@@ -137,6 +137,42 @@ body {
   color: var(--gray-600);
 }
 
+.panel-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feed-toggle {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: var(--radius);
+  padding: 0.125rem;
+}
+
+.feed-toggle-btn {
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.1875rem 0.5rem;
+  border: none;
+  border-radius: calc(var(--radius) - 1px);
+  background: transparent;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.feed-toggle-btn:hover {
+  color: var(--gray-700);
+}
+
+.feed-toggle-btn.active {
+  background: var(--bg-card);
+  color: var(--gray-900);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
 .badge {
   font-size: 0.75rem;
   font-weight: 500;
