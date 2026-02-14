@@ -14,16 +14,7 @@
       "id": "homepage@local",
       "strict_min_version": "109.0",
       "data_collection_permissions": {
-        "personally_identifying_info": false,
-        "health_info": false,
-        "financial_and_payment_info": false,
-        "auth_info": false,
-        "personal_communications": false,
-        "location": false,
-        "browsing_history": false,
-        "search_history": false,
-        "user_identifiers": false,
-        "technical_and_interaction": false
+        "required": ["none"]
       }
     }
   },
