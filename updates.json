@@ -1,7 +1,13 @@
 {
   "addons": {
     "homepage@brooksmcmillin.com": {
-      "updates": []
+      "updates": [
+        {
+          "version": "1.0.0",
+          "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.0.0/homepage-1.0.0.xpi",
+          "update_hash": "sha256:a967199dcea992a78b3fa9ba95d2eeee73172d11401ac88ebf3af3eb1b573c8b"
+        }
+      ]
     }
   }
 }
