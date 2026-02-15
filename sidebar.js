@@ -1,14 +1,8 @@
-const API_BASE = "https://todo.brooksmcmillin.com/api";
 const APP_BASE = "https://todo.brooksmcmillin.com";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
-function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+let consecutiveFailures = 0;
+let refreshTimer = null;
 
 function formatDueDate(dateStr) {
   if (!dateStr) return "";
@@ -29,28 +23,10 @@ function escapeHtml(str) {
   return el.innerHTML;
 }
 
-async function fetchTodayTasks() {
-  const today = todayStr();
-  const params = new URLSearchParams({ start_date: today, end_date: today });
-  const resp = await fetch(`${API_BASE}/todos?${params}`, {
-    credentials: "include",
-  });
-  if (!resp.ok) throw new Error(`${resp.status}`);
-  return resp.json();
-}
-
-async function fetchOverdueTasks() {
-  const params = new URLSearchParams({ status: "overdue" });
-  const resp = await fetch(`${API_BASE}/todos?${params}`, {
-    credentials: "include",
-  });
-  if (!resp.ok) throw new Error(`${resp.status}`);
-  return resp.json();
-}
-
 function renderTaskItem(task) {
-  const priority = task.priority || "medium";
-  const taskUrl = `${APP_BASE}/task/${task.id}`;
+  const priority = task.priority || DEFAULT_PRIORITY;
+  const taskId = Number(task.id);
+  const taskUrl = Number.isFinite(taskId) ? `${APP_BASE}/task/${taskId}` : APP_BASE;
 
   const metaParts = [];
   if (task.project_name) {
@@ -71,22 +47,30 @@ function renderTaskItem(task) {
   `;
 }
 
+function scheduleNextRefresh() {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  const multiplier = Math.min(2 ** consecutiveFailures, MAX_BACKOFF_MULTIPLIER);
+  refreshTimer = setTimeout(loadTasks, REFRESH_INTERVAL_MS * multiplier);
+}
+
 async function loadTasks() {
   const container = document.getElementById("tasks");
   const countBadge = document.getElementById("task-count");
 
   try {
+    const today = todayStr();
     const [todayResult, overdueResult] = await Promise.all([
-      fetchTodayTasks(),
-      fetchOverdueTasks(),
+      fetchJson(`${API_BASE}/todos?${new URLSearchParams({ start_date: today, end_date: today })}`),
+      fetchJson(`${API_BASE}/todos?${new URLSearchParams({ status: "overdue" })}`),
     ]);
 
     const todayTasks = todayResult.data || [];
     const overdueTasks = (overdueResult.data || []).filter(
-      (t) => t.due_date !== todayStr()
+      (t) => t.due_date !== today
     );
     const total = todayTasks.length + overdueTasks.length;
 
+    consecutiveFailures = 0;
     countBadge.textContent = total;
 
     if (total === 0) {
@@ -112,10 +96,12 @@ async function loadTasks() {
 
     container.innerHTML = html;
   } catch (err) {
+    consecutiveFailures++;
     container.innerHTML = '<div class="error-state">Could not load tasks</div>';
     console.error("Sidebar tasks fetch error:", err);
   }
+
+  scheduleNextRefresh();
 }
 
 loadTasks();
-setInterval(loadTasks, REFRESH_INTERVAL_MS);

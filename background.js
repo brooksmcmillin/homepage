@@ -1,29 +1,13 @@
-const API_BASE = "https://todo.brooksmcmillin.com/api";
 const POLL_INTERVAL_MINUTES = 5;
 
-function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+let consecutiveFailures = 0;
 
 async function fetchTaskCount() {
   const today = todayStr();
-  const [todayResp, overdueResp] = await Promise.all([
-    fetch(`${API_BASE}/todos?${new URLSearchParams({ start_date: today, end_date: today })}`, {
-      credentials: "include",
-    }),
-    fetch(`${API_BASE}/todos?${new URLSearchParams({ status: "overdue" })}`, {
-      credentials: "include",
-    }),
+  const [todayData, overdueData] = await Promise.all([
+    fetchJson(`${API_BASE}/todos?${new URLSearchParams({ start_date: today, end_date: today })}`),
+    fetchJson(`${API_BASE}/todos?${new URLSearchParams({ status: "overdue" })}`),
   ]);
-
-  if (!todayResp.ok || !overdueResp.ok) return null;
-
-  const todayData = await todayResp.json();
-  const overdueData = await overdueResp.json();
 
   const todayTasks = todayData.data || [];
   const overdueTasks = (overdueData.data || []).filter(
@@ -33,24 +17,29 @@ async function fetchTaskCount() {
   return todayTasks.length + overdueTasks.length;
 }
 
+function scheduleNextPoll() {
+  const multiplier = Math.min(2 ** consecutiveFailures, MAX_BACKOFF_MULTIPLIER);
+  const interval = POLL_INTERVAL_MINUTES * multiplier;
+  browser.alarms.create("badge-update", { delayInMinutes: interval });
+}
+
 async function updateBadge() {
   try {
     const count = await fetchTaskCount();
-    if (count === null) {
-      browser.browserAction.setBadgeText({ text: "!" });
-      browser.browserAction.setBadgeBackgroundColor({ color: "#6b7280" });
-      return;
-    }
+    consecutiveFailures = 0;
 
     browser.browserAction.setBadgeText({ text: count > 0 ? String(count) : "" });
     browser.browserAction.setBadgeBackgroundColor({
       color: count > 0 ? "#2563eb" : "#22c55e",
     });
   } catch (err) {
+    consecutiveFailures++;
     console.error("Badge update failed:", err);
     browser.browserAction.setBadgeText({ text: "!" });
     browser.browserAction.setBadgeBackgroundColor({ color: "#6b7280" });
   }
+
+  scheduleNextPoll();
 }
 
 // Toggle sidebar on toolbar button click
@@ -59,7 +48,6 @@ browser.browserAction.onClicked.addListener(() => {
 });
 
 // Poll on alarm
-browser.alarms.create("badge-update", { periodInMinutes: POLL_INTERVAL_MINUTES });
 browser.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "badge-update") {
     updateBadge();
