@@ -2,54 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Tab</title>
-  <link rel="stylesheet" href="newtab.css">
+  <script>window.location.replace("https://todo.brooksmcmillin.com/home");</script>
 </head>
-<body>
-  <main class="container">
-    <header class="header">
-      <h1 class="greeting" id="greeting"></h1>
-      <time class="date" id="date"></time>
-    </header>
-
-    <div class="grid">
-      <section class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Due Today</h2>
-          <span class="badge" id="task-count"></span>
-        </div>
-        <div id="tasks" class="task-list">
-          <div class="skeleton-loader">
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-line"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Feed</h2>
-          <div class="panel-header-right">
-            <div class="feed-toggle" id="feed-toggle">
-              <button class="feed-toggle-btn active" data-feed-filter="featured">Featured</button>
-              <button class="feed-toggle-btn" data-feed-filter="all">All</button>
-            </div>
-            <span class="badge" id="article-count"></span>
-          </div>
-        </div>
-        <div id="articles" class="article-list">
-          <div class="skeleton-loader">
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-line"></div>
-          </div>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <script src="newtab.js"></script>
-</body>
+<body></body>
 </html>
