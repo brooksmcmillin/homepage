@@ -10,6 +10,10 @@
         {
           "version": "1.1.0",
           "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.1.0/homepage-1.1.0.xpi"
+        },
+        {
+          "version": "1.1.1",
+          "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.1.1/homepage-1.1.1.xpi"
         }
       ]
     }
