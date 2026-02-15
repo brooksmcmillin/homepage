@@ -19,6 +19,11 @@
         {
           "version": "1.2.0",
           "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.2.0/homepage-1.2.0.xpi"
+        },
+        {
+          "version": "1.2.0",
+          "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.2.0/homepage-1.2.0.xpi",
+          "update_hash": "sha256:aca9e2da2cbd4810441105ce8addb31ffb0f71b5a1e2b7ec6a2e53ff0b5886ee"
         }
       ]
     }
