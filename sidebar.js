@@ -3,6 +3,7 @@ const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 let consecutiveFailures = 0;
 let refreshTimer = null;
+const completingTasks = new Set();
 
 function formatDueDate(dateStr) {
   if (!dateStr) return "";
@@ -23,7 +24,45 @@ function escapeHtml(str) {
   return el.innerHTML;
 }
 
-function renderTaskItem(task) {
+async function completeTask(event, taskId, source) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (completingTasks.has(taskId)) return;
+  completingTasks.add(taskId);
+
+  const item = event.target.closest(".task-row");
+  if (item) item.classList.add("completing");
+
+  try {
+    await postJson(`${API_BASE}/todos/${taskId}/complete`, {});
+    if (item) item.remove();
+
+    const countBadge = document.getElementById("task-count");
+    const current = parseInt(countBadge.textContent, 10);
+    if (Number.isFinite(current) && current > 0) {
+      countBadge.textContent = current - 1;
+    }
+
+    // If section is now empty, remove it
+    const container = document.getElementById("tasks");
+    const overdueSection = container.querySelector(".overdue-section");
+    if (overdueSection && overdueSection.querySelectorAll(".task-row").length === 0) {
+      overdueSection.remove();
+    }
+
+    // If no tasks left at all, show empty state
+    if (container.querySelectorAll(".task-row").length === 0) {
+      container.innerHTML = '<div class="empty-state">Nothing due today</div>';
+    }
+  } catch (err) {
+    console.error("Failed to complete task:", err);
+    if (item) item.classList.remove("completing");
+  } finally {
+    completingTasks.delete(taskId);
+  }
+}
+
+function renderTaskItem(task, source) {
   const priority = task.priority || DEFAULT_PRIORITY;
   const taskId = Number(task.id);
   const taskUrl = Number.isFinite(taskId) ? `${APP_BASE}/task/${taskId}` : APP_BASE;
@@ -37,13 +76,16 @@ function renderTaskItem(task) {
   }
 
   return `
-    <a class="task-item" href="${escapeHtml(taskUrl)}" target="_blank" rel="noopener">
-      <span class="priority-dot ${priority}"></span>
-      <div class="task-content">
-        <div class="task-title">${escapeHtml(task.title)}</div>
-        ${metaParts.length ? `<div class="task-meta">${metaParts.join('<span>&middot;</span>')}</div>` : ""}
-      </div>
-    </a>
+    <div class="task-row" data-task-id="${taskId}">
+      <button class="complete-btn" onclick="completeTask(event, ${taskId}, '${source}')" title="Mark complete"></button>
+      <a class="task-item" href="${escapeHtml(taskUrl)}" target="_blank" rel="noopener">
+        <span class="priority-dot ${priority}"></span>
+        <div class="task-content">
+          <div class="task-title">${escapeHtml(task.title)}</div>
+          ${metaParts.length ? `<div class="task-meta">${metaParts.join('<span>&middot;</span>')}</div>` : ""}
+        </div>
+      </a>
+    </div>
   `;
 }
 
@@ -83,7 +125,7 @@ async function loadTasks() {
     if (overdueTasks.length > 0) {
       html += '<div class="overdue-section">';
       html += '<div class="section-label overdue">Overdue</div>';
-      html += overdueTasks.map(renderTaskItem).join("");
+      html += overdueTasks.map((t) => renderTaskItem(t, "overdue")).join("");
       html += "</div>";
     }
 
@@ -91,7 +133,7 @@ async function loadTasks() {
       if (overdueTasks.length > 0) {
         html += '<div class="section-label">Today</div>';
       }
-      html += todayTasks.map(renderTaskItem).join("");
+      html += todayTasks.map((t) => renderTaskItem(t, "today")).join("");
     }
 
     container.innerHTML = html;
