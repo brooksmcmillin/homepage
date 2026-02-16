@@ -1,15 +1,12 @@
 {
   "manifest_version": 2,
   "name": "Homepage",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "New tab page showing today's tasks and RSS feed",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
-  "permissions": [
-    "https://todo.brooksmcmillin.com/*",
-    "alarms"
-  ],
+  "permissions": ["https://todo.brooksmcmillin.com/*", "alarms"],
   "background": {
     "scripts": ["utils.js", "background.js"]
   },
