@@ -37,26 +37,29 @@ async function completeTask(event, taskId, source) {
     await postJson(`${API_BASE}/todos/${taskId}/complete`, {});
     if (item) item.remove();
 
-    const countBadge = document.getElementById("task-count");
-    const current = parseInt(countBadge.textContent, 10);
-    if (Number.isFinite(current) && current > 0) {
-      countBadge.textContent = current - 1;
-    }
-
-    // If section is now empty, remove it
     const container = document.getElementById("tasks");
+
+    // If overdue section is now empty, remove it
     const overdueSection = container.querySelector(".overdue-section");
     if (overdueSection && overdueSection.querySelectorAll(".task-row").length === 0) {
       overdueSection.remove();
     }
 
+    // Update badge to match remaining tasks in DOM
+    const remaining = container.querySelectorAll(".task-row").length;
+    document.getElementById("task-count").textContent = remaining;
+
     // If no tasks left at all, show empty state
-    if (container.querySelectorAll(".task-row").length === 0) {
+    if (remaining === 0) {
       container.innerHTML = '<div class="empty-state">Nothing due today</div>';
     }
   } catch (err) {
     console.error("Failed to complete task:", err);
-    if (item) item.classList.remove("completing");
+    if (item) {
+      item.classList.remove("completing");
+      item.classList.add("complete-error");
+      item.addEventListener("animationend", () => item.classList.remove("complete-error"), { once: true });
+    }
   } finally {
     completingTasks.delete(taskId);
   }
@@ -77,7 +80,7 @@ function renderTaskItem(task, source) {
 
   return `
     <div class="task-row" data-task-id="${taskId}">
-      <button class="complete-btn" onclick="completeTask(event, ${taskId}, '${source}')" title="Mark complete"></button>
+      <button class="complete-btn" data-source="${source}" title="Mark complete"></button>
       <a class="task-item" href="${escapeHtml(taskUrl)}" target="_blank" rel="noopener">
         <span class="priority-dot ${priority}"></span>
         <div class="task-content">
@@ -87,6 +90,15 @@ function renderTaskItem(task, source) {
       </a>
     </div>
   `;
+}
+
+function bindCompleteBtns(container) {
+  container.querySelectorAll(".complete-btn").forEach((btn) => {
+    const row = btn.closest(".task-row");
+    const taskId = Number(row.dataset.taskId);
+    const source = btn.dataset.source;
+    btn.addEventListener("click", (e) => completeTask(e, taskId, source));
+  });
 }
 
 function scheduleNextRefresh() {
@@ -137,6 +149,7 @@ async function loadTasks() {
     }
 
     container.innerHTML = html;
+    bindCompleteBtns(container);
   } catch (err) {
     consecutiveFailures++;
     container.innerHTML = '<div class="error-state">Could not load tasks</div>';
