@@ -49,7 +49,16 @@ function formatDueDate(dateStr) {
 function escapeHtml(str) {
   const el = document.createElement("span");
   el.textContent = str;
-  return el.innerHTML;
+  return el.innerHTML.replace(/"/g, "&quot;");
+}
+
+function safeUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? url : "#";
+  } catch {
+    return "#";
+  }
 }
 
 function renderTaskItem(task, source) {
@@ -60,7 +69,7 @@ function renderTaskItem(task, source) {
 
   const metaParts = [];
   metaParts.push(
-    `<span class="task-status ${escapeHtml(status)}">${escapeHtml(status.replace("_", " "))}</span>`
+    `<span class="task-status ${escapeHtml(status)}">${escapeHtml(status.replaceAll("_", " "))}</span>`
   );
   if (task.project_name) {
     metaParts.push(`<span class="task-project">${escapeHtml(task.project_name)}</span>`);
@@ -91,7 +100,7 @@ function renderTaskItem(task, source) {
 function renderArticleItem(article) {
   const readClass = article.is_read ? " read" : "";
   return `
-    <a class="article-item${readClass}" href="${escapeHtml(article.url)}" target="_blank" rel="noopener">
+    <a class="article-item${readClass}" href="${escapeHtml(safeUrl(article.url))}" target="_blank" rel="noopener">
       <div class="article-title">${escapeHtml(article.title)}</div>
       ${article.summary ? `<div class="article-summary">${escapeHtml(article.summary)}</div>` : ""}
       <div class="article-meta">
@@ -106,12 +115,11 @@ function bindCompleteBtns(container) {
   container.querySelectorAll(".complete-btn").forEach((btn) => {
     const row = btn.closest(".task-row");
     const taskId = Number(row.dataset.taskId);
-    const source = btn.dataset.source;
-    btn.addEventListener("click", (e) => completeTask(e, taskId, source));
+    btn.addEventListener("click", (e) => completeTask(e, taskId));
   });
 }
 
-async function completeTask(event, taskId, source) {
+async function completeTask(event, taskId) {
   event.preventDefault();
   event.stopPropagation();
   if (completingTasks.has(taskId)) return;
@@ -241,7 +249,9 @@ function toggleFeatured(featured) {
 
 // Init
 document.getElementById("greeting").textContent = getGreeting();
-document.getElementById("date-string").textContent = getDateString();
+const dateEl = document.getElementById("date-string");
+dateEl.textContent = getDateString();
+dateEl.setAttribute("datetime", todayStr());
 
 document.getElementById("btn-featured").addEventListener("click", () => toggleFeatured(true));
 document.getElementById("btn-all").addEventListener("click", () => toggleFeatured(false));
