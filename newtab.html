@@ -2,8 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://todo.brooksmcmillin.com; img-src 'self' data:;">
   <title>New Tab</title>
-  <script src="newtab.js"></script>
+  <link rel="stylesheet" href="newtab.css">
 </head>
-<body></body>
+<body>
+  <main class="home-container">
+    <header class="home-header">
+      <h1 class="greeting" id="greeting"></h1>
+      <time class="date" id="date-string"></time>
+    </header>
+
+    <div class="home-grid">
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Due Today</h2>
+          <span class="badge" id="task-count"></span>
+        </div>
+        <div id="tasks" class="task-list">
+          <div class="skeleton-loader">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Feed</h2>
+          <div class="panel-header-right">
+            <div class="filter-toggle">
+              <button class="filter-toggle-btn active" id="btn-featured">Featured</button>
+              <button class="filter-toggle-btn" id="btn-all">All Sources</button>
+            </div>
+            <span class="badge" id="article-count"></span>
+          </div>
+        </div>
+        <div id="articles" class="article-list">
+          <div class="skeleton-loader">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="utils.js"></script>
+  <script src="newtab.js"></script>
+</body>
 </html>
