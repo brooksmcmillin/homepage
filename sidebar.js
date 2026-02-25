@@ -82,7 +82,7 @@ function renderTaskItem(task, source) {
     <div class="task-row" data-task-id="${taskId}">
       <button class="complete-btn" data-source="${source}" title="Mark complete"></button>
       <a class="task-item" href="${escapeHtml(taskUrl)}" target="_blank" rel="noopener">
-        <span class="priority-dot ${priority}"></span>
+        <span class="priority-dot ${escapeHtml(priority)}"></span>
         <div class="task-content">
           <div class="task-title">${escapeHtml(task.title)}</div>
           ${metaParts.length ? `<div class="task-meta">${metaParts.join('<span>&middot;</span>')}</div>` : ""}

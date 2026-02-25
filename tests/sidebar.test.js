@@ -60,6 +60,7 @@ describe("sidebar.js", () => {
   });
 
   afterEach(() => {
+    vi.clearAllTimers();
     vi.useRealTimers();
     document.body.innerHTML = "";
   });
@@ -199,6 +200,15 @@ describe("sidebar.js", () => {
         "today",
       );
       expect(html).toContain('data-task-id="99"');
+    });
+
+    it("escapes malicious priority value in class attribute", () => {
+      const html = sidebar.renderTaskItem(
+        { id: 1, title: "Task", priority: '"><img src=x onerror=alert(1)>' },
+        "today",
+      );
+      expect(html).not.toContain("<img");
+      expect(html).toContain("&lt;img");
     });
 
     it("includes complete button with source", () => {

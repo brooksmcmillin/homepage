@@ -47,7 +47,7 @@ describe("background.js", () => {
       () => "2026-02-24",
       mockFetchJson,
       mockBrowser,
-      console,
+      { error: vi.fn(), log: vi.fn() },
     );
   });
 
