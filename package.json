@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.2",
+    "eslint-plugin-no-unsanitized": "^4.1.5",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
+  }
+}
