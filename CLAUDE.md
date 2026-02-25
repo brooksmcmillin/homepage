@@ -8,8 +8,6 @@ A Firefox WebExtension (Manifest v2) that overrides the new tab page with a task
 
 ## Build & Lint Commands
 
-There is no package.json — all tooling runs via `npx`:
-
 ```sh
 # Lint (validates manifest + extension structure)
 npx web-ext lint --self-hosted
@@ -19,13 +17,20 @@ npx web-ext build --source-dir=. --artifacts-dir=./artifacts
 
 # Run in Firefox for development (launches a temporary profile)
 npx web-ext run
-```
 
-There are no tests.
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
 
 ## Architecture
 
-**No bundler, no dependencies.** All files are vanilla JS loaded directly by the browser.
+**No bundler, no runtime dependencies.** All files are vanilla JS loaded directly by the browser. Dev dependencies (vitest, jsdom, eslint) are in `package.json` for testing only.
 
 ### Script loading contexts
 
@@ -57,6 +62,15 @@ All contexts share: `API_BASE`, `DEFAULT_PRIORITY`, `MAX_BACKOFF_MULTIPLIER`, `t
 - DOM rendering via innerHTML with escaped content
 - Task completion deduplication via a `completingTasks` Set
 - CSP enforced via `<meta>` tags in HTML files (no inline scripts allowed)
+
+## Tools
+
+- **Node packages**: managed via `npm` (`package.json`)
+- **Python-based CLI tools** (semgrep, zizmor, etc.): install with `uv tool install <package>`, NOT `pip install`. After installation they're available as regular CLI commands.
+  ```sh
+  uv tool install semgrep
+  uv tool install zizmor
+  ```
 
 ## Release Process
 
