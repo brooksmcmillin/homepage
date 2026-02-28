@@ -46,7 +46,7 @@ jobs:
       - name: Verify build output
         run: ls -la artifacts/*.zip
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: extension-build
           path: artifacts/*.zip
