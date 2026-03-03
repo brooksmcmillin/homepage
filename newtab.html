@@ -14,10 +14,32 @@
       <time class="date" id="date-string"></time>
     </header>
 
+    <div class="stats-bar hidden" id="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-streak">0d</span>
+        <span class="stat-label">streak</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-today">0</span>
+        <span class="stat-label">today</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-week">0</span>
+        <span class="stat-label">this week</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-saved">0</span>
+        <span class="stat-label">saved</span>
+      </div>
+    </div>
+
     <div class="home-grid">
       <section class="panel">
         <div class="panel-header">
-          <h2 class="panel-title">Tasks</h2>
+          <h2 class="panel-title">Due Today</h2>
           <span class="badge" id="task-count"></span>
         </div>
         <div id="tasks" class="task-list">
@@ -40,6 +62,7 @@
             <span class="badge" id="article-count"></span>
           </div>
         </div>
+        <div id="highlight"></div>
         <div id="articles" class="article-list">
           <div class="skeleton-loader">
             <div class="skeleton-line"></div>
@@ -50,6 +73,8 @@
       </section>
     </div>
   </main>
+
+  <div id="toasts" class="toast-container"></div>
 
   <script src="utils.js"></script>
   <script src="newtab.js"></script>
