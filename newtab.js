@@ -188,7 +188,7 @@ function bindCompleteBtns(container) {
 function bindArticleHandlers(container) {
   container.querySelectorAll(".article-row").forEach((row) => {
     const articleId = Number(row.dataset.articleId);
-    const article = articlesData.find((a) => a.id === articleId);
+    const article = articlesData.find((a) => Number(a.id) === articleId);
     if (!article) return;
 
     // Mark as read on click
@@ -209,18 +209,24 @@ function bindArticleHandlers(container) {
     bookmarkBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (bookmarkBtn.dataset.pending) return;
+      bookmarkBtn.dataset.pending = "1";
       const newState = !article.is_bookmarked;
       article.is_bookmarked = newState;
       bookmarkBtn.classList.toggle("bookmarked", newState);
       bookmarkBtn.innerHTML = newState ? BOOKMARK_FILLED_SVG : BOOKMARK_OUTLINE_SVG;
       bookmarkBtn.title = newState ? "Remove bookmark" : "Save for later";
 
-      postJson(`${API_BASE}/news/${articleId}/bookmark`, { is_bookmarked: newState }).catch(() => {
-        article.is_bookmarked = !newState;
-        bookmarkBtn.classList.toggle("bookmarked", !newState);
-        bookmarkBtn.innerHTML = !newState ? BOOKMARK_FILLED_SVG : BOOKMARK_OUTLINE_SVG;
-        bookmarkBtn.title = !newState ? "Remove bookmark" : "Save for later";
-      });
+      postJson(`${API_BASE}/news/${articleId}/bookmark`, { is_bookmarked: newState })
+        .catch(() => {
+          article.is_bookmarked = !newState;
+          bookmarkBtn.classList.toggle("bookmarked", !newState);
+          bookmarkBtn.innerHTML = !newState ? BOOKMARK_FILLED_SVG : BOOKMARK_OUTLINE_SVG;
+          bookmarkBtn.title = !newState ? "Remove bookmark" : "Save for later";
+        })
+        .finally(() => {
+          delete bookmarkBtn.dataset.pending;
+        });
     });
   });
 }
@@ -240,16 +246,16 @@ async function completeTask(event, taskId, source) {
 
   try {
     const removedTask = source === "today"
-      ? todayTasksData.find((t) => t.id === taskId)
-      : overdueTasksData.find((t) => t.id === taskId);
+      ? todayTasksData.find((t) => Number(t.id) === taskId)
+      : overdueTasksData.find((t) => Number(t.id) === taskId);
 
     await postJson(`${API_BASE}/todos/${taskId}/complete`, {});
     if (item) item.remove();
 
     if (source === "today") {
-      todayTasksData = todayTasksData.filter((t) => t.id !== taskId);
+      todayTasksData = todayTasksData.filter((t) => Number(t.id) !== taskId);
     } else {
-      overdueTasksData = overdueTasksData.filter((t) => t.id !== taskId);
+      overdueTasksData = overdueTasksData.filter((t) => Number(t.id) !== taskId);
     }
 
     const container = document.getElementById("tasks");
@@ -336,33 +342,7 @@ async function loadTasks() {
 
     todayTasksData = todayResult.data || [];
     overdueTasksData = (overdueResult.data || []).filter((t) => t.due_date !== today);
-    const total = todayTasksData.length + overdueTasksData.length;
-
-    countBadge.textContent = total;
-
-    if (total === 0) {
-      container.innerHTML = '<div class="empty-state">Nothing due today</div>';
-      return;
-    }
-
-    let html = "";
-
-    if (overdueTasksData.length > 0) {
-      html += '<div class="overdue-section">';
-      html += '<div class="section-label overdue">Overdue</div>';
-      html += overdueTasksData.map((t) => renderTaskItem(t, "overdue")).join("");
-      html += "</div>";
-    }
-
-    if (todayTasksData.length > 0) {
-      if (overdueTasksData.length > 0) {
-        html += '<div class="section-label">Today</div>';
-      }
-      html += todayTasksData.map((t) => renderTaskItem(t, "today")).join("");
-    }
-
-    container.innerHTML = html;
-    bindCompleteBtns(container);
+    rerenderTasks();
   } catch (err) {
     container.innerHTML = '<div class="error-state">Could not load tasks</div>';
     console.error("Tasks fetch error:", err);
@@ -447,7 +427,7 @@ async function loadHighlight() {
     link.addEventListener("click", () => {
       if (!article.is_read) {
         article.is_read = true;
-        postJson(`${API_BASE}/news/${article.id}/read`, { is_read: true }).catch(() => {
+        postJson(`${API_BASE}/news/${Number(article.id)}/read`, { is_read: true }).catch(() => {
           article.is_read = false;
         });
       }
