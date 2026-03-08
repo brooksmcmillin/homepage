@@ -1,4 +1,4 @@
-const APP_BASE = "https://todo.brooksmcmillin.com";
+const APP_BASE = "https://api.nexus.brooksmcmillin.com";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 let consecutiveFailures = 0;

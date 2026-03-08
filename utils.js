@@ -1,4 +1,4 @@
-const API_BASE = "https://todo.brooksmcmillin.com/api";
+const API_BASE = "https://api.nexus.brooksmcmillin.com/api";
 const DEFAULT_PRIORITY = "medium";
 const MAX_BACKOFF_MULTIPLIER = 8;
 

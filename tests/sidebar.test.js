@@ -50,7 +50,7 @@ describe("sidebar.js", () => {
     mockFetchJson = vi.fn();
     mockPostJson = vi.fn();
     sidebar = createSidebar(
-      "https://todo.brooksmcmillin.com/api",
+      "https://api.nexus.brooksmcmillin.com/api",
       "medium",
       8,
       () => "2026-02-24",
@@ -158,7 +158,7 @@ describe("sidebar.js", () => {
         "today",
       );
       expect(html).toContain(
-        'href="https://todo.brooksmcmillin.com/task/42"',
+        'href="https://api.nexus.brooksmcmillin.com/task/42"',
       );
     });
 
@@ -167,7 +167,7 @@ describe("sidebar.js", () => {
         { id: "abc", title: "Task", priority: "medium" },
         "today",
       );
-      expect(html).toContain('href="https://todo.brooksmcmillin.com"');
+      expect(html).toContain('href="https://api.nexus.brooksmcmillin.com"');
     });
 
     it("uses DEFAULT_PRIORITY when task has no priority", () => {
@@ -324,7 +324,7 @@ describe("sidebar.js", () => {
       await sidebar.completeTask(makeEvent(btn), 42, "today");
 
       expect(mockPostJson).toHaveBeenCalledWith(
-        "https://todo.brooksmcmillin.com/api/todos/42/complete",
+        "https://api.nexus.brooksmcmillin.com/api/todos/42/complete",
         {},
       );
     });
@@ -486,7 +486,7 @@ describe("sidebar.js", () => {
       document.querySelector(".complete-btn").click();
 
       expect(mockPostJson).toHaveBeenCalledWith(
-        "https://todo.brooksmcmillin.com/api/todos/1/complete",
+        "https://api.nexus.brooksmcmillin.com/api/todos/1/complete",
         {},
       );
     });
@@ -505,7 +505,7 @@ describe("sidebar.js", () => {
       container.querySelector(".complete-btn").click();
 
       expect(mockPostJson).toHaveBeenCalledWith(
-        "https://todo.brooksmcmillin.com/api/todos/7/complete",
+        "https://api.nexus.brooksmcmillin.com/api/todos/7/complete",
         {},
       );
     });
