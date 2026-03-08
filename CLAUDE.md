@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Firefox WebExtension (Manifest v2) that overrides the new tab page with a tasks + news feed dashboard, and provides a sidebar for quick task management. Connects to a backend API at `https://todo.brooksmcmillin.com`.
+A Firefox WebExtension (Manifest v2) that overrides the new tab page with a tasks + news feed dashboard, and provides a sidebar for quick task management. Connects to a backend API at `https://api.nexus.brooksmcmillin.com`.
 
 ## Build & Lint Commands
 
