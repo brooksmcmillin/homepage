@@ -12,7 +12,7 @@ describe("utils.js", () => {
     const utils = createUtils(() => {});
 
     it("API_BASE points to the todo app API", () => {
-      expect(utils.API_BASE).toBe("https://todo.brooksmcmillin.com/api");
+      expect(utils.API_BASE).toBe("https://api.nexus.brooksmcmillin.com/api");
     });
 
     it("DEFAULT_PRIORITY is medium", () => {

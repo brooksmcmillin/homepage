@@ -42,7 +42,7 @@ describe("background.js", () => {
     mockBrowser = makeBrowser();
     mockFetchJson = vi.fn();
     bg = createBackground(
-      "https://todo.brooksmcmillin.com/api",
+      "https://api.nexus.brooksmcmillin.com/api",
       8,
       () => "2026-02-24",
       mockFetchJson,
