@@ -61,10 +61,13 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
+          VERSION: ${{ steps.version.outputs.version }}
+          ASSET_NAME: ${{ steps.asset.outputs.asset_name }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            "${{ steps.asset.outputs.asset_name }}" \
-            --title "v${{ steps.version.outputs.version }}" \
+          gh release create "$REF_NAME" \
+            "$ASSET_NAME" \
+            --title "v$VERSION" \
             --generate-notes
 
       - name: Update updates.json
