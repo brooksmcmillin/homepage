@@ -1,4 +1,4 @@
-const APP_BASE = "https://api.nexus.brooksmcmillin.com";
+const APP_BASE = "https://nexus.brooksmcmillin.com";
 
 let showFeaturedOnly = true;
 const completingTasks = new Set();
