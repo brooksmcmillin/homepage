@@ -158,7 +158,7 @@ describe("sidebar.js", () => {
         "today",
       );
       expect(html).toContain(
-        'href="https://api.nexus.brooksmcmillin.com/task/42"',
+        'href="https://nexus.brooksmcmillin.com/task/42"',
       );
     });
 
@@ -167,7 +167,7 @@ describe("sidebar.js", () => {
         { id: "abc", title: "Task", priority: "medium" },
         "today",
       );
-      expect(html).toContain('href="https://api.nexus.brooksmcmillin.com"');
+      expect(html).toContain('href="https://nexus.brooksmcmillin.com"');
     });
 
     it("uses DEFAULT_PRIORITY when task has no priority", () => {

@@ -1,4 +1,4 @@
-const APP_BASE = "https://api.nexus.brooksmcmillin.com";
+const APP_BASE = "https://nexus.brooksmcmillin.com";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 let consecutiveFailures = 0;
@@ -114,8 +114,8 @@ async function loadTasks() {
   try {
     const today = todayStr();
     const [todayResult, overdueResult] = await Promise.all([
-      fetchJson(`${API_BASE}/todos?${new URLSearchParams({ start_date: today, end_date: today })}`),
-      fetchJson(`${API_BASE}/todos?${new URLSearchParams({ status: "overdue" })}`),
+      fetchJson(`${API_BASE}/todos?${new URLSearchParams({ start_date: today, end_date: today, exclude_no_calendar: "true", status: "pending" })}`),
+      fetchJson(`${API_BASE}/todos?${new URLSearchParams({ status: "overdue", exclude_no_calendar: "true" })}`),
     ]);
 
     const todayTasks = todayResult.data || [];
