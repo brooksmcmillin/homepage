@@ -225,7 +225,8 @@ async function requestSummary(articleId) {
 
   try {
     const result = await postJson(`${API_BASE}/news/${articleId}/summarize`, {});
-    const summary = result.data.ai_summary;
+    const summary = result?.data?.ai_summary;
+    if (!summary) throw new Error("No summary in response");
     const article = articlesData.find((a) => Number(a.id) === articleId);
     if (article) article.ai_summary = summary;
     expandedSummaries.add(articleId);
@@ -458,6 +459,7 @@ async function loadArticles(featured) {
   const container = document.getElementById("articles");
   const countBadge = document.getElementById("article-count");
 
+  expandedSummaries.clear();
   countBadge.textContent = "";
   container.innerHTML = `
     <div class="skeleton-loader">
