@@ -78,6 +78,10 @@
           "version": "1.6.1",
           "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.6.1/homepage-1.6.1.xpi",
           "update_hash": "sha256:1dc75fc331f911afe921445c2281bfe65cf266e883f09d4c734590e21bbbd0df"
+        },
+        {
+          "version": "1.7.0",
+          "update_link": "https://github.com/brooksmcmillin/homepage/releases/download/v1.7.0/homepage-1.7.0.xpi"
         }
       ]
     }

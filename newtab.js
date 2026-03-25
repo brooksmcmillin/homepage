@@ -2,6 +2,8 @@ const APP_BASE = "https://nexus.brooksmcmillin.com";
 
 let showFeaturedOnly = true;
 const completingTasks = new Set();
+const summarizingArticles = new Set();
+const expandedSummaries = new Set();
 
 // Keep article data in memory for bookmark toggling and read tracking
 let articlesData = [];
@@ -159,16 +161,41 @@ function renderTaskItem(task, source) {
 
 function renderArticleItem(article) {
   const readClass = article.is_read ? " read" : "";
+  const articleId = Number(article.id);
+
+  let summarySection;
+  if (article.ai_summary) {
+    const expanded = expandedSummaries.has(articleId);
+    summarySection = `
+      <div class="ai-summary-section">
+        <button class="ai-summary-toggle">
+          <span class="ai-summary-chevron${expanded ? " expanded" : ""}">&#9656;</span>
+          AI Summary
+        </button>
+        ${expanded ? `<div class="ai-summary-box">${escapeHtml(article.ai_summary)}</div>` : ""}
+      </div>
+    `;
+  } else {
+    summarySection = `
+      <div class="ai-summary-section">
+        <button class="ai-summary-generate">&#10022; Summarize</button>
+      </div>
+    `;
+  }
+
   return `
-    <div class="article-row${readClass}" data-article-id="${Number(article.id)}">
-      <a class="article-item" href="${escapeHtml(safeUrl(article.url))}" target="_blank" rel="noopener">
-        <div class="article-title">${escapeHtml(article.title)}</div>
-        ${article.summary ? `<div class="article-summary">${escapeHtml(article.summary)}</div>` : ""}
-        <div class="article-meta">
-          <span class="article-source">${escapeHtml(article.feed_source_name || "")}</span>
-          <span>${escapeHtml(timeAgo(article.published_at))}</span>
-        </div>
-      </a>
+    <div class="article-row${readClass}" data-article-id="${articleId}">
+      <div class="article-body">
+        <a class="article-item" href="${escapeHtml(safeUrl(article.url))}" target="_blank" rel="noopener">
+          <div class="article-title">${escapeHtml(article.title)}</div>
+          ${article.summary ? `<div class="article-summary">${escapeHtml(article.summary)}</div>` : ""}
+          <div class="article-meta">
+            <span class="article-source">${escapeHtml(article.feed_source_name || "")}</span>
+            <span>${escapeHtml(timeAgo(article.published_at))}</span>
+          </div>
+        </a>
+        ${summarySection}
+      </div>
       <button class="bookmark-btn${article.is_bookmarked ? " bookmarked" : ""}" title="${article.is_bookmarked ? "Remove bookmark" : "Save for later"}">
         ${article.is_bookmarked ? BOOKMARK_FILLED_SVG : BOOKMARK_OUTLINE_SVG}
       </button>
@@ -183,6 +210,71 @@ function bindCompleteBtns(container) {
     const source = btn.dataset.source;
     btn.addEventListener("click", (e) => completeTask(e, taskId, source));
   });
+}
+
+async function requestSummary(articleId) {
+  if (summarizingArticles.has(articleId)) return;
+  summarizingArticles.add(articleId);
+
+  const row = document.querySelector(`.article-row[data-article-id="${articleId}"]`);
+  const btn = row?.querySelector(".ai-summary-generate");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="generate-spinner"></span> Generating\u2026';
+  }
+
+  try {
+    const result = await postJson(`${API_BASE}/news/${articleId}/summarize`, {});
+    const summary = result?.data?.ai_summary;
+    if (!summary) throw new Error("No summary in response");
+    const article = articlesData.find((a) => Number(a.id) === articleId);
+    if (article) article.ai_summary = summary;
+    expandedSummaries.add(articleId);
+    if (row) renderSummarySection(row, articleId);
+  } catch {
+    showToast("Failed to generate summary", 3000);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = "&#10022; Summarize";
+    }
+  } finally {
+    summarizingArticles.delete(articleId);
+  }
+}
+
+function toggleAiSummary(articleId) {
+  if (expandedSummaries.has(articleId)) {
+    expandedSummaries.delete(articleId);
+  } else {
+    expandedSummaries.add(articleId);
+  }
+  const row = document.querySelector(`.article-row[data-article-id="${articleId}"]`);
+  if (row) renderSummarySection(row, articleId);
+}
+
+function renderSummarySection(row, articleId) {
+  const section = row.querySelector(".ai-summary-section");
+  const article = articlesData.find((a) => Number(a.id) === articleId);
+  if (!section || !article) return;
+
+  if (article.ai_summary) {
+    const expanded = expandedSummaries.has(articleId);
+    section.innerHTML = `
+      <button class="ai-summary-toggle">
+        <span class="ai-summary-chevron${expanded ? " expanded" : ""}">&#9656;</span>
+        AI Summary
+      </button>
+      ${expanded ? `<div class="ai-summary-box">${escapeHtml(article.ai_summary)}</div>` : ""}
+    `;
+    section.querySelector(".ai-summary-toggle").addEventListener("click", () => toggleAiSummary(articleId));
+  } else {
+    section.innerHTML = '<button class="ai-summary-generate">&#10022; Summarize</button>';
+    section.querySelector(".ai-summary-generate").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      requestSummary(articleId);
+    });
+  }
 }
 
 function bindArticleHandlers(container) {
@@ -203,6 +295,20 @@ function bindArticleHandlers(container) {
         });
       }
     });
+
+    // AI summary handlers
+    const summaryGenBtn = row.querySelector(".ai-summary-generate");
+    if (summaryGenBtn) {
+      summaryGenBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        requestSummary(articleId);
+      });
+    }
+    const summaryToggleBtn = row.querySelector(".ai-summary-toggle");
+    if (summaryToggleBtn) {
+      summaryToggleBtn.addEventListener("click", () => toggleAiSummary(articleId));
+    }
 
     // Bookmark toggle
     const bookmarkBtn = row.querySelector(".bookmark-btn");
@@ -353,6 +459,7 @@ async function loadArticles(featured) {
   const container = document.getElementById("articles");
   const countBadge = document.getElementById("article-count");
 
+  expandedSummaries.clear();
   countBadge.textContent = "";
   container.innerHTML = `
     <div class="skeleton-loader">
