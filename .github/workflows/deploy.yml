@@ -31,14 +31,14 @@ jobs:
           node-version: '22'
 
       - name: Build extension
-        uses: kewisch/action-web-ext@v1
+        uses: kewisch/action-web-ext@v2
         id: build
         with:
           cmd: build
           source: .
 
       - name: Sign extension
-        uses: kewisch/action-web-ext@v1
+        uses: kewisch/action-web-ext@v2
         id: sign
         with:
           cmd: sign
