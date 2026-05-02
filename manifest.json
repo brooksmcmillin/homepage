@@ -6,10 +6,20 @@
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
-  "permissions": ["https://api.nexus.brooksmcmillin.com/*", "alarms"],
+  "permissions": [
+    "https://api.nexus.brooksmcmillin.com/*",
+    "https://www.linkedin.com/*",
+    "alarms"
+  ],
   "background": {
     "scripts": ["utils.js", "background.js"]
   },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/messaging/*"],
+      "js": ["linkedin/selectors.js", "linkedin/content.js"]
+    }
+  ],
   "browser_action": {
     "default_icon": {
       "48": "icons/icon-48.svg",

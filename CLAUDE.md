@@ -34,11 +34,12 @@ npm run test:coverage
 
 ### Script loading contexts
 
-There are three separate execution contexts, each loading `utils.js` first:
+There are four separate execution contexts:
 
 1. **Background** (`utils.js` + `background.js`) — Polls task count every 5 minutes, updates toolbar badge, toggles sidebar on icon click. Runs as a background script (not a service worker).
 2. **New Tab** (`utils.js` + `newtab.js`) — Full dashboard with greeting, tasks panel (today + overdue), and news feed panel with Featured/All toggle.
 3. **Sidebar** (`utils.js` + `sidebar.js`) — Compact task list with auto-refresh. Simpler than new tab (no feed, no greeting).
+4. **LinkedIn content script** (`linkedin/selectors.js` + `linkedin/content.js`) — Runs on `linkedin.com/messaging/*` for the DM ingest/reply integration. To interact with React (e.g. trigger React-tracked input setters), use `window.wrappedJSObject` on Firefox to bypass the Xray wrapper; Chromium has no wrapper. All DOM selectors live in `linkedin/selectors.js` so LinkedIn UI changes only need a one-file fix.
 
 ### Shared utilities (`utils.js`)
 
